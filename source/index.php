@@ -7,7 +7,7 @@ if($fgmembersite->CheckLogin())
     exit;
 }
 
-if(isset($_POST['submitted']))
+if(isset($_POST['search_submitted']))
 {
    $fgmembersite->RedirectToURL("search-result.php");
    
@@ -66,7 +66,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
        <div class="top-menu">
         <span class="menu"></span> 
         <ul class="cl-effect-1">
-           <li><a class="scroll" href="index.html">HOME</a></li>
+           <li><a class="scroll" href="index.php">HOME</a></li>
            <li><a class="scroll" href="#">BRIEF</a></li>
            <li><a class="scroll" href="#">FEATURES</a></li>
            <li><a class="scroll" href="#">TOURS</a></li>
@@ -117,33 +117,33 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
           <div class="booking_room">
             <div class="reservation">
               <ul>
-                <form  method='post' accept-charset='UTF-8'>
+                <form  id='search' method='post' action='<?php echo $fgmembersite->GetSelfScript(); ?>' accept-charset='UTF-8'>
                   
-                    <input type='hidden' name='submitted' id='submitted' value='1'/>
+                    <input type='hidden' name='search_submitted' id='search_submitted' value='1'/>
                     <!-- <div class='short_explanation'>* required fields</div> -->
                     <li  class="span1_of_1 left">
-                      <h5>To</h5>
+                      <h5>Departure</h5>
                          <div class="book_date">
-                    <input input type="text" placeholder="Type Depature City" required="" />
+                    <input type="text" name='departure' id='departure' value='<?php echo $fgmembersite->SafeDisplay('departure'); ?>' placeholder="Type Depature City" required="" />
                     </div>
                     </li>
                     <li  class="span1_of_1 left">
-                      <h5>Depature</h5>
+                      <h5>Arrive</h5>
                          <div class="book_date">
                     
-                    <input type="text" placeholder="Type Destination City" required="" >
+                    <input type="text" name='arrive' id='arrive' value='<?php echo $fgmembersite->SafeDisplay('arrive'); ?>' placeholder="Type Destination City" required="" >
                           </div>
                     </li>
                     <li  class="span1_of_1 left">
-                         <h5>Depature</h5>
+                         <h5>Date</h5>
                          <div class="book_date">
-                           <input class="date" id="datepicker" type="text" value="2/04/2015" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '2/04/2015';}" required=>
+                           <input class="date" name='ddate' id="datepicker" type="text" value="2/04/2015" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '2/04/2015';}" required=>
                          </div>         
                        </li>
                     <li class="span1_of_1 left search_btn">
                     <div class="date_btn">
                       <div class="submit">
-                        <input type="submit" value="Search"/>
+                        <input type="submit" name='Submit' value="Search"/>
                       </div>
                       <div class="clear"></div>
                     </div>
