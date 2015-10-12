@@ -33,9 +33,6 @@ class FGMembersite
     var $trips_tablename;
     var $connection;
     var $rand_key;
-
-    var $departure;
-    var $arrive;
     
     var $error_message;
     
@@ -707,13 +704,6 @@ class FGMembersite
         $formvars['email'] = $this->Sanitize($_POST['email']);
         $formvars['username'] = $this->Sanitize($_POST['username']);
         $formvars['password'] = $this->Sanitize($_POST['password']);
-    }
-
-    function CollectSearchSubmission(&$formvars)
-    {
-        $formvars['departure'] = $this->Sanitize($_POST['departure']);
-        $formvars['arrive'] = $this->Sanitize($_POST['arrive']);
-        $formvars['ddate'] = $this->Sanitize($_POST['ddate']);
     }
     
     function SendUserConfirmationEmail(&$formvars)
