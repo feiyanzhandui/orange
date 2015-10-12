@@ -144,7 +144,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
                     <li class="span1_of_1 left search_btn">
                     <div class="date_btn">
                       <div class="submit">
-                        <input type="submit" name='Submit' value="Search"/>
+                        <input class="btn btn-info" type="submit" name='Submit' value="Search"/>
                       </div>
                       <div class="clear"></div>
                     </div>
