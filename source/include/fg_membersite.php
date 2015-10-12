@@ -33,6 +33,9 @@ class FGMembersite
     var $trips_tablename;
     var $connection;
     var $rand_key;
+
+    var $departure;
+    var $arrive;
     
     var $error_message;
     
@@ -283,8 +286,94 @@ class FGMembersite
         }
         return true;
     }
+
+    function RegisterSearchResult($departure, $arrive, $ddate)
+    {
+        if(!isset($_POST['search_submitted']))
+        {
+           return false;
+        }
+        if(empty($departure))
+        {
+           return false;
+        }
+        if(empty($arrive))
+        {
+           return false;
+        }
+        if(empty($ddate))
+        {
+           return false;
+        }
+        $_SESSION['departure'] = $departure;
+        $_SESSION['arrive'] = $arrive;
+        $_SESSION['ddate'] = $ddate;
+        
+        return true;
+    }
+
+    function getSearchResult()
+    {
+        if(empty($_SESSION['departure']))
+        {
+           return '';
+        }
+        if(empty($_SESSION['arrive']))
+        {
+           return '';
+        }
+        if(empty($_SESSION['ddate']))
+        {
+           return '';
+        }        
+        
+        return 'From: '.$_SESSION['departure'].'|To: '.$_SESSION['arrive'].' |Date: '.$_SESSION['ddate'];
+    }
+
+    function SearchTrip()
+    {
+        if(empty($_SESSION['departure']))
+        {
+           return false;
+        }
+        if(empty($_SESSION['arrive']))
+        {
+           return false;
+        }
+        if(empty($_SESSION['ddate']))
+        {
+           return false;
+        }
+        if(!$this->DBLogin())
+        {
+            $this->HandleError("Database login failed!");
+            return false;
+        }
+        $ddate = $this->SanitizeForSQL($_SESSION['ddate']);
+        $departure = $this->SanitizeForSQL($_SESSION['departure']);
+        $arrive = $this->SanitizeForSQL($_SESSION['arrive']);
+        $qry = "Select username, ddate, departure, destination from $this->trips_tablename where ddate='$ddate' and departure='$departure' and destination='$arrive'";
+        
+        $result = mysql_query($qry,$this->connection);
+        if(!$result || mysql_num_rows($result) <= 0)
+        {
+            $this->HandleError("Error logging in. The username or password does not match");
+            return false;
+        }
+
+        while($row = mysql_fetch_assoc($result))
+        {
+            echo $row['username'].' '.$row['ddate'].' '.$row['departure'].' '.$row['destination'].'<br>';
+            // code below is for future clickable
+            //echo '<a href="movie.php?movie_id='.urlencode($valueId).'">'.$valueName.'</a>';
+            //echo '<br/>';
+        }
+        return;
+    }
     
     //-------Public Helper functions -------------
+
+
     function GetSelfScript()
     {
         return htmlentities($_SERVER['PHP_SELF']);
@@ -619,6 +708,13 @@ class FGMembersite
         $formvars['username'] = $this->Sanitize($_POST['username']);
         $formvars['password'] = $this->Sanitize($_POST['password']);
     }
+
+    function CollectSearchSubmission(&$formvars)
+    {
+        $formvars['departure'] = $this->Sanitize($_POST['departure']);
+        $formvars['arrive'] = $this->Sanitize($_POST['arrive']);
+        $formvars['ddate'] = $this->Sanitize($_POST['ddate']);
+    }
     
     function SendUserConfirmationEmail(&$formvars)
     {
@@ -776,9 +872,26 @@ class FGMembersite
                 
         if(!mysql_query($qry,$this->connection))
         {
-            $this->HandleDBError("Error creating the table \nquery was\n $qry");
+            $this->HandleDBError("Error creating the user table \nquery was\n $qry");
             return false;
         }
+
+        $qry = "Create Table $this->trips_tablename (".
+                "id_trip INT NOT NULL AUTO_INCREMENT ,".
+                "username VARCHAR( 16 ) NOT NULL ,".
+                "ddate VARCHAR( 32 ) NOT NULL ,".
+                "departure VARCHAR(32) NOT NULL,".
+                "destination VARCHAR(32) NOT NULL,".
+                "PRIMARY KEY ( id_trip )".
+                ")";
+        
+        if(!mysql_query($qry,$this->connection))
+        {
+            $this->HandleDBError("Error creating the user table \nquery was\n $qry");
+            return false;
+        }
+
+
         return true;
     }
     
