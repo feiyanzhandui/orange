@@ -367,6 +367,32 @@ class FGMembersite
         }
         return;
     }
+
+    function RegisterTrip($user)
+    {
+        if(!isset($_POST['submitted']))
+        {
+           return false;
+        }
+        
+        $formvars = array();
+        
+        if(!$this->ValidateTripRegistrationSubmission())
+        {
+            return false;
+        }
+        
+        $this->CollectTripRegistrationSubmission($formvars);
+        
+        if(!$this->SaveTripToDatabase($formvars, $user))
+        {
+            return false;
+        }
+        
+        return true;
+    }
+
+
     
     //-------Public Helper functions -------------
 
@@ -697,6 +723,37 @@ class FGMembersite
         }        
         return true;
     }
+
+    function ValidateTripRegistrationSubmission()
+    {
+        //This is a hidden input field. Humans won't fill this field.
+        if(!empty($_POST[$this->GetSpamTrapInputName()]) )
+        {
+            //The proper error is not given intentionally
+            $this->HandleError("Automated submission prevention: case 2 failed");
+            return false;
+        }
+        
+        $validator = new FormValidator();
+        $validator->addValidation("ddate","req","Please fill in date");
+        $validator->addValidation("departure","req","Please fill in departure city");
+        $validator->addValidation("arrive","req","Please fill in arrive city");
+
+        
+        if(!$validator->ValidateForm())
+        {
+            $error='';
+            $error_hash = $validator->GetErrors();
+            foreach($error_hash as $inpname => $inp_err)
+            {
+                $error .= $inpname.':'.$inp_err."\n";
+            }
+            $this->HandleError($error);
+            return false;
+        }        
+        return true;
+    }
+
     
     function CollectRegistrationSubmission(&$formvars)
     {
@@ -704,6 +761,13 @@ class FGMembersite
         $formvars['email'] = $this->Sanitize($_POST['email']);
         $formvars['username'] = $this->Sanitize($_POST['username']);
         $formvars['password'] = $this->Sanitize($_POST['password']);
+    }
+
+    function CollectTripRegistrationSubmission(&$formvars)
+    {
+        $formvars['ddate'] = $this->Sanitize($_POST['ddate']);
+        $formvars['departure'] = $this->Sanitize($_POST['departure']);
+        $formvars['arrive'] = $this->Sanitize($_POST['arrive']);
     }
     
     function SendUserConfirmationEmail(&$formvars)
@@ -796,6 +860,25 @@ class FGMembersite
             return false;
         }        
         if(!$this->InsertIntoDB($formvars))
+        {
+            $this->HandleError("Inserting to Database failed!");
+            return false;
+        }
+        return true;
+    }
+
+    function SaveTripToDatabase(&$formvars, $user)
+    {
+        if(!$this->DBLogin())
+        {
+            $this->HandleError("Database login failed!");
+            return false;
+        }
+        if(!$this->Ensuretable())
+        {
+            return false;
+        }      
+        if(!$this->InsertTripIntoDB($formvars, $user))
         {
             $this->HandleError("Inserting to Database failed!");
             return false;
@@ -914,6 +997,34 @@ class FGMembersite
         }        
         return true;
     }
+
+    function InsertTripIntoDB(&$formvars, $user)
+    {
+    
+        
+        // $formvars['confirmcode'] = $confirmcode;
+        
+        $insert_query = 'insert into '.$this->trips_tablename.'(
+                username,
+                ddate,
+                departure,
+                destination
+                )
+                values
+                (
+                "' . $user . '",
+                "' . $this->SanitizeForSQL($formvars['ddate']) . '",
+                "' . $this->SanitizeForSQL($formvars['departure']) . '",
+                "' . $this->SanitizeForSQL($formvars['arrive']) . '"
+                )';      
+        if(!mysql_query( $insert_query ,$this->connection))
+        {
+            $this->HandleDBError("Error inserting data to the table\nquery:$insert_query");
+            return false;
+        }        
+        return true;
+    }
+
     function MakeConfirmationMd5($email)
     {
         $randno1 = rand();

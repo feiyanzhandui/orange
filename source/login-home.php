@@ -23,6 +23,7 @@ Welcome back <?= $fgmembersite->UserFullName(); ?>!
 <p><a href='change-pwd.php'>Change password</a></p>
 
 <p><a href='search-result.php'>Search</a></p>
+<p><a href='register-trip.php'>Submit A New Trip</a></p>
 <br><br><br>
 <p><a href='logout.php'>Logout</a></p>
 </div>
